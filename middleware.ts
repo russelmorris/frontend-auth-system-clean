@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from "next/server"
 
 export default async function middleware(req: NextRequest) {
-  // TEMPORARY: Simplified middleware for deployment testing
-  // The complex auth middleware was causing Vercel deployment failures
+  const { pathname } = req.nextUrl
   
-  const response = NextResponse.next()
+  // Allow access to auth pages and API routes without restriction
+  if (pathname.startsWith('/auth') || 
+      pathname.startsWith('/api/auth') || 
+      pathname.startsWith('/_next/') || 
+      pathname.startsWith('/favicon.ico') ||
+      pathname === '/') {
+    const response = NextResponse.next()
+    response.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    return response
+  }
   
-  // Basic security headers only
-  response.headers.set('X-Frame-Options', 'DENY')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  
-  return response
+  // For all other routes, redirect to signin for now
+  return NextResponse.redirect(new URL('/auth/signin', req.url))
 }
 
 export const config = {
