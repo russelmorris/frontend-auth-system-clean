@@ -3,10 +3,16 @@ import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { PrismaClient } from "@prisma/client"
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || process.env.AUTH_DATABASE_URL
+    }
+  }
+})
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: (process.env.DATABASE_URL || process.env.AUTH_DATABASE_URL) ? PrismaAdapter(prisma) : undefined,
   providers: [
     // Only add Google provider if credentials are configured
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
@@ -114,7 +120,7 @@ export const authOptions: NextAuthOptions = {
       }
     }
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-deployment-9ece6c643bb3743d06d6b74f9ce834b09f42c6db60ad3c83d6d4833f815cdafb',
   debug: process.env.NODE_ENV === 'development',
 }
 
