@@ -1,18 +1,19 @@
 import { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
+// Temporarily disable Prisma for Vercel deployment testing
+// import { PrismaAdapter } from "@next-auth/prisma-adapter"
+// import { PrismaClient } from "@prisma/client"
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || process.env.AUTH_DATABASE_URL
-    }
-  }
-})
+// const prisma = new PrismaClient({
+//   datasources: {
+//     db: {
+//       url: process.env.DATABASE_URL || process.env.AUTH_DATABASE_URL
+//     }
+//   }
+// })
 
 export const authOptions: NextAuthOptions = {
-  adapter: (process.env.DATABASE_URL || process.env.AUTH_DATABASE_URL) ? PrismaAdapter(prisma) : undefined,
+  // adapter: (process.env.DATABASE_URL || process.env.AUTH_DATABASE_URL) ? PrismaAdapter(prisma) : undefined,
   providers: [
     // Only add Google provider if credentials are configured
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [

@@ -8,10 +8,10 @@
   },
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "npm run prisma:generate-safe && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "npm run prisma:generate-safe",
+    "postinstall": "echo 'Skipping Prisma generation for Vercel deployment test'",
     "prisma:generate-safe": "prisma generate || echo 'Prisma generate failed, continuing...'"
   },
   "dependencies": {
