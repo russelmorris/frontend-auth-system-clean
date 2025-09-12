@@ -1,614 +1,594 @@
-# Project Plan: Modular Frontend Authorization System
+# Project Plan: Azure AD B2C Frontend Authorization System
 
 ## Project Overview
-Create a modular front-end authorization system that can be deployed to Vercel with Google and Microsoft OAuth integration, complete with email-based invitation system. The system will replicate the existing PGL freight analytics dashboard but add a secure authentication gate.
+Implement a fast-track Azure AD B2C authentication system that leverages Microsoft's prepackaged identity services to create a secure, invitation-based authorization gate for the existing freight analytics dashboard.
 
 ## Core Objective
-**"Existing front-end with a clean authorization entry gate"**
+**"Enterprise-grade authentication with minimal custom development using Azure AD B2C's prepackaged solutions"**
 
-## Technical Analysis
+## Phase 1: Azure AD B2C Setup (Prepackaged Solutions - 90 minutes)
+**Objective**: Get Microsoft's prepackaged authentication running immediately
 
-### Source Application Architecture
-- **Framework**: Next.js 15.5.2 with App Router
-- **UI Library**: React 19.1.0 + Radix UI components  
-- **Styling**: Tailwind CSS v4
-- **TypeScript**: Full type safety
-- **Key Dependencies**: 
-  - @tanstack/react-table for data tables
-  - Recharts for visualizations
-  - Weaviate client for semantic search
-  - OpenAI client for AI features
+### PART A: User Instructions for Azure Setup (30 minutes)
 
-### Target Authentication Requirements
-- **OAuth Providers**: Google + Microsoft
-- **Invitation System**: Email-specific invitation links
-- **Parameterization**: Configurable for different deployments
-- **Integration**: Seamless gate before dashboard access
+#### Step 1: Create Azure AD B2C Tenant
+**Action**: Set up your Microsoft identity service
+**User Instructions**:
+1. **Go to**: https://portal.azure.com
+2. **Sign in** with your Microsoft account (personal or business)
+3. **Search for**: "Azure AD B2C" in the top search bar
+4. **Click**: "Create a resource" → "Azure AD B2C"
+5. **Choose**: "Create a new Azure AD B2C Tenant"
+6. **Fill out**:
+   - **Tenant Name**: `freight-auth` (or your company name)
+   - **Initial Domain**: `freightauth.onmicrosoft.com` (must be unique)
+   - **Country/Region**: United States
+   - **Subscription**: Your Azure subscription
+   - **Resource Group**: Create new → `freight-auth-rg`
+7. **Click**: "Review + Create" → "Create"
+8. **Wait**: 3-5 minutes for tenant creation
+9. **Click**: "Go to resource" when deployment completes
 
-## Detailed Implementation Plan
+**Deliverable**: Active Azure AD B2C tenant
+**Evidence**: Dashboard shows "freight-auth" tenant
 
-### Phase 1: Infrastructure Setup (Steps 1-8)
-**Objective**: Establish foundation and copy existing codebase
+#### Step 2: Create User Flow for Sign-up/Sign-in
+**Action**: Configure the prepackaged authentication screens
+**User Instructions**:
+1. **In Azure AD B2C dashboard**, click "User flows"
+2. **Click**: "New user flow"
+3. **Select**: "Sign up and sign in"
+4. **Version**: "Recommended"
+5. **Click**: "Create"
+6. **Configure**:
+   - **Name**: `signup_signin_flow`
+   - **Identity providers**: Check "Email signup"
+   - **Multifactor authentication**: "Off" (for now)
+   - **User attributes**: Select:
+     - ✅ Email Address (collect + return)
+     - ✅ Display Name (collect + return)
+     - ✅ Given Name (collect + return)
+     - ✅ Surname (collect + return)
+7. **Click**: "Create"
 
-#### Step 1: Create Base Project Structure
-- **Action**: Initialize Next.js project structure
-- **Deliverable**: Basic file structure with proper directories
-- **Evidence**: Directory listing showing complete structure
-- **Microstep**: 
-  - Create `app/`, `components/`, `lib/`, `public/` directories
-  - Copy `package.json` and install dependencies
-  - Set up `next.config.ts`, `tailwind.config.js`, `tsconfig.json`
+**Deliverable**: Working user flow
+**Evidence**: User flow appears in list with "signup_signin_flow" name
 
-#### Step 2: Copy Core Frontend Components
-- **Action**: Transfer all UI components and pages from source
-- **Deliverable**: Fully functional dashboard (without auth)
-- **Evidence**: 
-  - File count match between source and target
-  - Dashboard loads without errors
-  - All components render correctly
-- **Microstep**:
-  - Copy `app/` directory structure
-  - Copy `components/` with all UI components
-  - Copy `lib/` utilities and helpers
-  - Copy `public/` assets including images
+#### Step 3: Create Application Registration
+**Action**: Register your Next.js app with Azure
+**User Instructions**:
+1. **Click**: "App registrations" in left menu
+2. **Click**: "New registration"
+3. **Fill out**:
+   - **Name**: `Freight Analytics App`
+   - **Supported account types**: "Accounts in this organizational directory only"
+   - **Redirect URI**: 
+     - Platform: "Web"
+     - URL: `https://frontend-auth-system-clean-git-master-russel-morris-projects.vercel.app/api/auth/callback/azure-ad-b2c`
+   - Also add for local development: `http://localhost:3000/api/auth/callback/azure-ad-b2c`
+4. **Click**: "Register"
+5. **Copy** the following values (you'll need them):
+   - **Application (client) ID**: (save this as `AZURE_AD_B2C_CLIENT_ID`)
+   - **Directory (tenant) ID**: (save this as `AZURE_AD_B2C_TENANT_ID`)
+6. **Click**: "Certificates & secrets"
+7. **Click**: "New client secret"
+8. **Description**: `FreightApp-Secret`
+9. **Expires**: 24 months
+10. **Click**: "Add"
+11. **Copy**: The secret value (save this as `AZURE_AD_B2C_CLIENT_SECRET`)
 
-#### Step 3: Environment Configuration
-- **Action**: Set up environment variables for multi-deployment support
-- **Deliverable**: Configurable environment system
-- **Evidence**: Environment variables properly loaded and used
-- **Microstep**:
-  - Create `.env.local` template
-  - Add deployment-specific variables
-  - Add OAuth client IDs/secrets placeholders
-  - Add database connection strings
+**⚠️ CRITICAL**: Copy the client secret immediately - you cannot see it again!
 
-#### Step 4: Database Schema Design for Auth
-- **Action**: Design auth tables compatible with existing system
-- **Deliverable**: Database schema for user management
-- **Evidence**: SQL migration files and table structure
-- **Microstep**:
-  - Design `users` table (id, email, name, provider, created_at)
-  - Design `invitations` table (id, email, token, used, expires_at)
-  - Design `user_sessions` table for session management
-  - Create migration scripts
+**Deliverable**: App registration with credentials
+**Evidence**: App appears in registrations list with client ID
 
-#### Step 5: API Route Structure
-- **Action**: Create API endpoints for authentication flow
-- **Deliverable**: Complete API route structure
-- **Evidence**: API routes return proper status codes
-- **Microstep**:
-  - `/api/auth/signin` - OAuth initiation
-  - `/api/auth/callback` - OAuth callback handling
-  - `/api/auth/session` - Session validation
-  - `/api/invitations/create` - Create invitation
-  - `/api/invitations/validate` - Validate invitation token
+#### Step 4: Configure Invitation Settings (Optional but Recommended)
+**Action**: Set up invitation-only access
+**User Instructions**:
+1. **Click**: "User flows" → your `signup_signin_flow`
+2. **Click**: "Properties"
+3. **User assignment**: Change to "Assignment required"
+4. **Self-service sign-up**: "Disabled" (only invited users can register)
+5. **Click**: "Save"
 
-#### Step 6: OAuth Provider Configuration
-- **Action**: Set up Google and Microsoft OAuth applications
-- **Deliverable**: OAuth providers configured and tested
-- **Evidence**: OAuth consent screens load correctly
-- **Microstep**:
-  - Create Google Cloud Console OAuth 2.0 client
-  - Create Microsoft Azure AD application registration
-  - Configure redirect URIs
-  - Test OAuth flows manually
+**Deliverable**: Invitation-only configuration
+**Evidence**: Properties show "Assignment required" and sign-up disabled
 
-#### Step 7: JWT/Session Management System
-- **Action**: Implement secure session management
-- **Deliverable**: JWT token system with refresh logic
-- **Evidence**: Tokens generate, validate, and refresh properly
-- **Microstep**:
-  - Implement JWT token generation with proper claims
-  - Add JWT validation middleware
-  - Create refresh token rotation
-  - Add secure cookie handling
+### PART B: Environment Configuration (15 minutes)
 
-#### Step 8: Initial Testing Framework
-- **Action**: Set up testing infrastructure
-- **Deliverable**: Test suites for auth components
-- **Evidence**: Tests run and pass
-- **Microstep**:
-  - Set up Jest and React Testing Library
-  - Create auth flow integration tests
-  - Add component unit tests
-  - Set up E2E testing with Playwright
+#### Step 5: Update Vercel Environment Variables
+**Action**: Configure your deployment with Azure credentials
+**User Instructions**:
+1. **Go to**: https://vercel.com/dashboard
+2. **Select**: your frontend project
+3. **Go to**: Settings → Environment Variables
+4. **Add** these variables:
+   ```
+   AZURE_AD_B2C_TENANT_NAME=freight-auth
+   AZURE_AD_B2C_TENANT_ID=[from Step 3]
+   AZURE_AD_B2C_CLIENT_ID=[from Step 3]
+   AZURE_AD_B2C_CLIENT_SECRET=[from Step 3]
+   AZURE_AD_B2C_PRIMARY_USER_FLOW=signup_signin_flow
+   NEXTAUTH_URL=https://your-vercel-app.vercel.app
+   NEXTAUTH_SECRET=ultra-secure-random-string-256-bits
+   ```
+5. **Environment**: Select "Production, Preview, and Development"
+6. **Click**: "Save" for each variable
 
-### Phase 2: Authentication Components (Steps 9-16)
-**Objective**: Create modular authentication UI components
+**Deliverable**: Environment variables configured
+**Evidence**: All 7 variables show in Vercel dashboard
 
-#### Step 9: Auth Layout Component
-- **Action**: Create wrapper component for authentication screens
-- **Deliverable**: Reusable auth layout with branding
-- **Evidence**: Layout renders with proper styling
-- **Microstep**:
-  - Create `AuthLayout` component with logo placement
-  - Add responsive design for mobile/desktop
-  - Include loading states and error handling
-  - Add accessibility attributes
+#### Step 6: Install Dependencies
+**Action**: Add Azure AD B2C and NextAuth packages
+**Files to modify**: `package.json`
 
-#### Step 10: Login Screen Component
-- **Action**: Build main authentication entry point
-- **Deliverable**: Login screen with OAuth buttons
-- **Evidence**: OAuth providers buttons work correctly
-- **Microstep**:
-  - Create `LoginScreen` with provider buttons
-  - Add hover states and loading indicators
-  - Implement proper error messaging
-  - Add CSRF protection
-
-#### Step 11: Invitation Validation Component
-- **Action**: Component to handle invitation links
-- **Deliverable**: Invitation validation screen
-- **Evidence**: Valid/invalid invitations handled properly
-- **Microstep**:
-  - Create `InvitationValidation` component
-  - Add invitation token parsing from URL
-  - Implement expiration checking
-  - Add invitation acceptance flow
-
-#### Step 12: User Profile Component
-- **Action**: Post-auth user information display
-- **Deliverable**: User profile/account component
-- **Evidence**: User data displays correctly
-- **Microstep**:
-  - Create `UserProfile` component
-  - Add avatar/name display
-  - Implement logout functionality
-  - Add account settings options
-
-#### Step 13: Admin Invitation Panel
-- **Action**: Interface for sending invitations
-- **Deliverable**: Admin panel for invitation management
-- **Evidence**: Invitations can be created and sent
-- **Microstep**:
-  - Create `InvitationPanel` component
-  - Add email input with validation
-  - Implement bulk invitation sending
-  - Add invitation status tracking
-
-#### Step 14: Route Protection HOC
-- **Action**: Higher-order component for route protection
-- **Deliverable**: Reusable route protection logic
-- **Evidence**: Unauthorized access redirects to login
-- **Microstep**:
-  - Create `withAuth` HOC
-  - Add role-based access control
-  - Implement automatic redirects
-  - Add loading states during auth check
-
-#### Step 15: Auth Context Provider
-- **Action**: React context for auth state management
-- **Deliverable**: Global auth state management
-- **Evidence**: Auth state persists across navigation
-- **Microstep**:
-  - Create `AuthProvider` context
-  - Add auth state persistence
-  - Implement automatic token refresh
-  - Add logout on token expiry
-
-#### Step 16: Error Boundary for Auth
-- **Action**: Error handling for authentication failures
-- **Deliverable**: Graceful auth error handling
-- **Evidence**: Auth errors don't crash application
-- **Microstep**:
-  - Create `AuthErrorBoundary` component
-  - Add specific error messages for common failures
-  - Implement error reporting
-  - Add recovery mechanisms
-
-### Phase 3: Backend Integration (Steps 17-24)
-**Objective**: Connect authentication system to backend services
-
-#### Step 17: Database Connection Setup
-- **Action**: Connect to PostgreSQL database from .env
-- **Deliverable**: Working database connection
-- **Evidence**: Database queries execute successfully
-- **Microstep**:
-  - Set up Prisma ORM with existing database
-  - Create connection pooling
-  - Add database health checks
-  - Test CRUD operations
-
-#### Step 18: User Model and Operations
-- **Action**: Implement user data persistence
-- **Deliverable**: Complete user CRUD operations
-- **Evidence**: Users can be created, read, updated, deleted
-- **Microstep**:
-  - Create User model with Prisma schema
-  - Implement user creation on first login
-  - Add user profile updates
-  - Add soft delete functionality
-
-#### Step 19: Invitation System Backend
-- **Action**: Build invitation creation and validation logic
-- **Deliverable**: Complete invitation workflow
-- **Evidence**: Invitations created, validated, and consumed
-- **Microstep**:
-  - Create invitation token generation
-  - Implement email sending logic
-  - Add invitation expiration handling
-  - Create invitation usage tracking
-
-#### Step 20: Session Management Backend
-- **Action**: Implement session storage and validation
-- **Deliverable**: Secure session handling
-- **Evidence**: Sessions persist and validate correctly
-- **Microstep**:
-  - Create session storage (Redis or DB)
-  - Implement session cleanup
-  - Add concurrent session limits
-  - Create session invalidation
-
-#### Step 21: OAuth Callback Processing
-- **Action**: Handle OAuth provider callbacks
-- **Deliverable**: Working OAuth flow end-to-end
-- **Evidence**: Users can login with Google/Microsoft
-- **Microstep**:
-  - Process OAuth authorization codes
-  - Exchange codes for access tokens
-  - Retrieve user information from providers
-  - Create or update user records
-
-#### Step 22: Authorization Middleware
-- **Action**: Protect API routes and pages
-- **Deliverable**: Route-level authentication
-- **Evidence**: Unauthorized requests blocked
-- **Microstep**:
-  - Create Next.js middleware for auth
-  - Add API route protection
-  - Implement role-based permissions
-  - Add rate limiting
-
-#### Step 23: Existing API Integration
-- **Action**: Connect auth system to existing dashboard APIs
-- **Deliverable**: Authenticated access to existing features
-- **Evidence**: Dashboard loads data after authentication
-- **Microstep**:
-  - Update existing API routes with auth checks
-  - Add user context to API calls
-  - Implement user-specific data filtering
-  - Test all existing functionality
-
-#### Step 24: Email Service Integration
-- **Action**: Set up email delivery for invitations
-- **Deliverable**: Working email invitation system
-- **Evidence**: Invitation emails delivered successfully
-- **Microstep**:
-  - Configure email service (SendGrid/SES)
-  - Create email templates
-  - Implement email queue system
-  - Add delivery tracking
-
-### Phase 4: Integration and Testing (Steps 25-32)
-**Objective**: Integrate all components and ensure system works end-to-end
-
-#### Step 25: Component Integration Testing
-- **Action**: Test all auth components work together
-- **Deliverable**: Integrated auth flow
-- **Evidence**: Complete login flow works without errors
-- **Microstep**:
-  - Test login → dashboard flow
-  - Verify session persistence
-  - Test logout functionality
-  - Validate error handling
-
-#### Step 26: Dashboard Integration
-- **Action**: Connect auth system to existing dashboard
-- **Deliverable**: Protected dashboard access
-- **Evidence**: Dashboard only accessible after login
-- **Microstep**:
-  - Add auth wrapper to dashboard pages
-  - Update navigation with user info
-  - Add logout option to dashboard
-  - Test all dashboard functionality
-
-#### Step 27: Invitation Flow Testing
-- **Action**: End-to-end invitation testing
-- **Deliverable**: Working invitation system
-- **Evidence**: Invitations sent, received, and used successfully
-- **Microstep**:
-  - Test invitation creation
-  - Verify email delivery
-  - Test invitation acceptance
-  - Validate invitation expiration
-
-#### Step 28: Cross-browser Testing
-- **Action**: Test auth system across browsers
-- **Deliverable**: Cross-browser compatibility
-- **Evidence**: System works in Chrome, Firefox, Safari, Edge
-- **Microstep**:
-  - Test OAuth flows in each browser
-  - Verify cookie/session handling
-  - Test responsive design
-  - Validate accessibility
-
-#### Step 29: Mobile Responsiveness
-- **Action**: Ensure auth system works on mobile
-- **Deliverable**: Mobile-optimized auth screens
-- **Evidence**: Auth flows work on mobile devices
-- **Microstep**:
-  - Test on iOS Safari and Chrome
-  - Test on Android Chrome and Firefox
-  - Verify touch interactions
-  - Test portrait/landscape modes
-
-#### Step 30: Performance Optimization
-- **Action**: Optimize auth system performance
-- **Deliverable**: Fast authentication flows
-- **Evidence**: Auth operations complete under 2 seconds
-- **Microstep**:
-  - Optimize OAuth callback processing
-  - Add caching for user sessions
-  - Minimize auth-related JavaScript bundles
-  - Add loading states to prevent UI blocking
-
-#### Step 31: Security Audit
-- **Action**: Review security implementation
-- **Deliverable**: Security-hardened auth system
-- **Evidence**: No critical security vulnerabilities
-- **Microstep**:
-  - Review JWT implementation security
-  - Audit OAuth flow for vulnerabilities
-  - Test CSRF protection
-  - Validate input sanitization
-
-#### Step 32: Load Testing
-- **Action**: Test system under load
-- **Deliverable**: Scalable auth system
-- **Evidence**: System handles expected concurrent users
-- **Microstep**:
-  - Test concurrent login attempts
-  - Verify database performance under load
-  - Test invitation email sending capacity
-  - Monitor memory and CPU usage
-
-### Phase 5: Deployment (Steps 33-40)
-**Objective**: Deploy to Vercel and create production-ready system
-
-#### Step 33: Vercel Project Setup
-- **Action**: Create new Vercel project via API
-- **Deliverable**: New Vercel project configured
-- **Evidence**: Project visible in Vercel dashboard
-- **Microstep**:
-  - Use Vercel API to create project
-  - Configure project settings
-  - Set up custom domain (if needed)
-  - Configure build settings
-
-#### Step 34: Environment Variables Configuration
-- **Action**: Set production environment variables
-- **Deliverable**: Production environment configured
-- **Evidence**: All env vars properly set in Vercel
-- **Microstep**:
-  - Set OAuth client IDs/secrets
-  - Configure database connection string
-  - Set JWT secret keys
-  - Configure email service credentials
-
-#### Step 35: Database Migration
-- **Action**: Run database migrations in production
-- **Deliverable**: Production database ready
-- **Evidence**: All tables created with proper structure
-- **Microstep**:
-  - Run Prisma migrations
-  - Verify table structure
-  - Set up database indexes
-  - Configure connection pooling
-
-#### Step 36: OAuth Provider Production Config
-- **Action**: Update OAuth apps with production URLs
-- **Deliverable**: OAuth working in production
-- **Evidence**: OAuth login works from production domain
-- **Microstep**:
-  - Update Google OAuth redirect URIs
-  - Update Microsoft OAuth redirect URIs
-  - Test OAuth flows from production
-  - Verify consent screens
-
-#### Step 37: Initial Deployment
-- **Action**: Deploy application to Vercel
-- **Deliverable**: Running application in production
-- **Evidence**: Application accessible via Vercel URL
-- **Microstep**:
-  - Push code to GitHub
-  - Trigger Vercel deployment
-  - Monitor build logs
-  - Test basic application functionality
-
-#### Step 38: SSL and Domain Configuration
-- **Action**: Configure HTTPS and custom domain
-- **Deliverable**: Secure production deployment
-- **Evidence**: Application accessible via HTTPS
-- **Microstep**:
-  - Configure SSL certificates
-  - Set up custom domain (if provided)
-  - Test HTTPS redirect
-  - Verify certificate validity
-
-#### Step 39: Production Monitoring Setup
-- **Action**: Set up error monitoring and logging
-- **Deliverable**: Production monitoring in place
-- **Evidence**: Errors and performance metrics tracked
-- **Microstep**:
-  - Configure Vercel analytics
-  - Set up error tracking (Sentry)
-  - Add performance monitoring
-  - Set up alerts for critical errors
-
-#### Step 40: Production Testing
-- **Action**: Comprehensive testing in production environment
-- **Deliverable**: Fully functional production system
-- **Evidence**: All features work in production
-- **Microstep**:
-  - Test complete auth flow in production
-  - Verify invitation system works
-  - Test dashboard access and functionality
-  - Validate email delivery in production
-
-### Final Verification (Steps 41-42)
-**Objective**: Confirm system meets all requirements
-
-#### Step 41: Requirements Validation
-- **Action**: Verify all original requirements met
-- **Deliverable**: Requirements compliance report
-- **Evidence**: Documented proof of each requirement
-- **Microstep**:
-  - Modular authorization system ✓
-  - Google OAuth integration ✓
-  - Microsoft OAuth integration ✓
-  - Email invitation system ✓
-  - Parameterized deployment ✓
-  - Existing dashboard replicated ✓
-
-#### Step 42: Documentation and Handover
-- **Action**: Create comprehensive documentation
-- **Deliverable**: Complete documentation package
-- **Evidence**: Documentation covers all aspects
-- **Microstep**:
-  - Update CODE DOCUMENTATION.md
-  - Create deployment guide
-  - Document configuration options
-  - Create user guide for admins
-
-## Technical Architecture
-
-### Authentication Flow
-```mermaid
-graph TD
-    A[User visits site] --> B{Invited?}
-    B -->|No| C[Login screen]
-    B -->|Yes| D[Validate invitation]
-    D --> C
-    C --> E[Choose OAuth provider]
-    E --> F[OAuth provider auth]
-    F --> G[OAuth callback]
-    G --> H[Create/update user]
-    H --> I[Generate JWT]
-    I --> J[Set secure cookie]
-    J --> K[Redirect to dashboard]
+```bash
+npm install next-auth @azure/msal-node @azure/msal-browser
 ```
 
-### Component Architecture
+**Deliverable**: Dependencies installed
+**Evidence**: Packages appear in package.json
+
+### PART C: NextAuth Integration (45 minutes)
+
+#### Step 7: Configure NextAuth with Azure AD B2C
+**Action**: Create authentication configuration
+**File**: `lib/auth.ts`
+
+```typescript
+import { NextAuthOptions } from "next-auth"
+import AzureADProvider from "next-auth/providers/azure-ad"
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    AzureADProvider({
+      clientId: process.env.AZURE_AD_B2C_CLIENT_ID!,
+      clientSecret: process.env.AZURE_AD_B2C_CLIENT_SECRET!,
+      tenantId: process.env.AZURE_AD_B2C_TENANT_ID!,
+      primaryUserFlow: process.env.AZURE_AD_B2C_PRIMARY_USER_FLOW!,
+      authorization: {
+        params: {
+          scope: "openid profile email offline_access"
+        }
+      }
+    })
+  ],
+  session: {
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60, // 24 hours
+  },
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      // All Azure AD B2C authenticated users are allowed
+      // (invitation filtering happens at the Azure level)
+      return true
+    },
+    async jwt({ token, user, account }) {
+      if (user) {
+        token.userId = user.id
+        token.email = user.email
+        token.name = user.name
+      }
+      return token
+    },
+    async session({ session, token }) {
+      session.user.id = token.userId as string
+      session.user.email = token.email as string
+      session.user.name = token.name as string
+      return session
+    }
+  },
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error',
+  }
+}
 ```
-src/
-├── components/
-│   ├── auth/
-│   │   ├── AuthLayout.tsx
-│   │   ├── LoginScreen.tsx
-│   │   ├── InvitationValidation.tsx
-│   │   ├── UserProfile.tsx
-│   │   └── withAuth.tsx
-│   ├── dashboard/
-│   │   └── (existing components)
-│   └── ui/
-│       └── (shared components)
-├── app/
-│   ├── api/
-│   │   ├── auth/
-│   │   └── invitations/
-│   ├── login/
-│   ├── dashboard/
-│   └── layout.tsx
-├── lib/
-│   ├── auth/
-│   ├── db/
-│   └── utils/
-└── middleware.ts
+
+**Deliverable**: NextAuth configuration
+**Evidence**: File compiles without errors
+
+#### Step 8: Create NextAuth API Route
+**Action**: Set up authentication endpoints
+**File**: `app/api/auth/[...nextauth]/route.ts`
+
+```typescript
+import NextAuth from "next-auth"
+import { authOptions } from "@/lib/auth"
+
+const handler = NextAuth(authOptions)
+
+export { handler as GET, handler as POST }
 ```
 
-### Security Considerations
-- **JWT Security**: Short-lived access tokens with refresh rotation
-- **CSRF Protection**: SameSite cookies and CSRF tokens
-- **OAuth Security**: State parameter validation, PKCE for public clients  
-- **Input Validation**: Strict validation on all user inputs
-- **Rate Limiting**: Prevent brute force attacks on auth endpoints
-- **Session Management**: Secure session storage with proper cleanup
+**Deliverable**: API endpoints active
+**Evidence**: Route accessible at `/api/auth/signin`
 
-### Parameterization Strategy
-- **Environment-based**: Different .env files for different deployments
-- **Database-driven**: Configuration stored in database
-- **Build-time**: Next.js environment variables for build customization
-- **Runtime**: Dynamic configuration API for deployment-specific settings
+#### Step 9: Create Simple Sign-in Page
+**Action**: Build authentication entry point
+**File**: `app/auth/signin/page.tsx`
 
-## Risk Assessment and Mitigation
+```typescript
+'use client'
 
-### High Risk Items
-1. **OAuth Provider Limits**: Risk of hitting rate limits during testing
-   - *Mitigation*: Use development mode, implement proper caching
-2. **Database Connection Limits**: Risk of connection pool exhaustion
-   - *Mitigation*: Proper connection pooling, connection cleanup
-3. **Email Delivery**: Risk of emails being marked as spam
-   - *Mitigation*: Use reputable email service, proper DNS configuration
+import { signIn, getSession } from "next-auth/react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
-### Medium Risk Items
-1. **Cross-browser Compatibility**: OAuth flows may behave differently
-   - *Mitigation*: Extensive testing across browsers
-2. **Mobile OAuth**: Mobile browsers may have different behavior
-   - *Mitigation*: Test on actual mobile devices
+export default function SignIn() {
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
-### Low Risk Items
-1. **Vercel Deployment**: Standard Next.js deployment should work
-2. **UI Component Integration**: Using established patterns
-3. **Database Migrations**: Using tested ORM (Prisma)
+  useEffect(() => {
+    getSession().then((session) => {
+      if (session) {
+        router.push('/dashboard')
+      }
+    })
+  }, [router])
 
-## Success Metrics
+  const handleSignIn = async () => {
+    setLoading(true)
+    await signIn('azure-ad', { 
+      callbackUrl: '/dashboard' 
+    })
+  }
 
-### Technical Metrics
-- **Authentication Success Rate**: >99%
-- **Page Load Time**: <3 seconds for dashboard
-- **OAuth Completion Rate**: >95%
-- **Email Delivery Rate**: >98%
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full space-y-8 p-6 bg-white rounded-lg shadow-md">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Freight Analytics
+          </h2>
+          <p className="text-gray-600">
+            Sign in with your Microsoft account to continue
+          </p>
+        </div>
+        
+        <button
+          onClick={handleSignIn}
+          disabled={loading}
+          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+        >
+          {loading ? 'Signing in...' : 'Continue with Microsoft'}
+        </button>
+        
+        <p className="text-xs text-center text-gray-500">
+          By signing in, you agree to our terms of service and privacy policy.
+        </p>
+      </div>
+    </div>
+  )
+}
+```
 
-### User Experience Metrics
-- **Login Flow Completion**: <30 seconds
-- **Invitation Acceptance**: <5 minutes
-- **Error Rate**: <1% of auth attempts
+**Deliverable**: Functional sign-in page
+**Evidence**: Page loads at `/auth/signin`
 
-### Security Metrics
-- **No Critical Vulnerabilities**: OWASP top 10 compliance
-- **Token Security**: No token leakage in logs or client
-- **Session Security**: Proper session invalidation
+#### Step 10: Add Session Provider to Layout
+**Action**: Wrap app with authentication context
+**File**: `app/layout.tsx`
+
+```typescript
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { getServerSession } from "next-auth";
+import { SessionProvider } from "next-auth/react";
+import { authOptions } from "@/lib/auth";
+import "./globals.css";
+
+// ... font definitions ...
+
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getServerSession(authOptions)
+  
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <SessionProvider session={session}>
+          {children}
+        </SessionProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+#### Step 11: Create Basic Route Protection
+**Action**: Protect dashboard routes
+**File**: `middleware.ts`
+
+```typescript
+import { withAuth } from "next-auth/middleware"
+
+export default withAuth(
+  function middleware(req) {
+    // Request is already authenticated by this point
+    return
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token
+    },
+  }
+)
+
+export const config = {
+  matcher: ["/dashboard/:path*", "/api/:path*"]
+}
+```
+
+**Deliverable**: Protected routes
+**Evidence**: Unauthenticated access redirects to sign-in
+
+---
+
+## Phase 2: Custom Enhancement Features (4-6 hours)
+**Objective**: Add custom functionality beyond what Azure provides
+
+### Custom Admin Dashboard for User Management
+
+#### Step 12: Create User Management API
+**Action**: Build custom invitation and user management
+**File**: `app/api/admin/users/route.ts`
+
+```typescript
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+
+// Get all users from your application database
+export async function GET() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user?.email?.endsWith('@yourdomain.com')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+  
+  // Your logic to fetch users
+  return NextResponse.json({ users: [] })
+}
+
+// Create invitation
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user?.email?.endsWith('@yourdomain.com')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+  
+  const { email } = await req.json()
+  
+  // Your logic to create Azure AD B2C invitation
+  return NextResponse.json({ success: true })
+}
+```
+
+#### Step 13: CSV Bulk Invitation System
+**Action**: Build CSV upload interface
+**File**: `app/admin/page.tsx`
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { redirect } from 'next/navigation'
+
+export default function AdminPanel() {
+  const { data: session, status } = useSession()
+  const [csvFile, setCsvFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  
+  if (status === 'loading') return <div>Loading...</div>
+  if (!session) redirect('/auth/signin')
+  
+  // Check if user is admin (customize this logic)
+  const isAdmin = session.user?.email?.endsWith('@yourdomain.com')
+  if (!isAdmin) redirect('/dashboard')
+
+  const handleCsvUpload = async () => {
+    if (!csvFile) return
+    
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('csv', csvFile)
+    
+    try {
+      const response = await fetch('/api/admin/bulk-invite', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (response.ok) {
+        alert('Invitations sent successfully!')
+        setCsvFile(null)
+      } else {
+        alert('Failed to send invitations')
+      }
+    } catch (error) {
+      alert('Error uploading file')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">User Management</h1>
+      
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-4">Bulk User Invitation</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Upload CSV file with email addresses
+            </label>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+          
+          <button
+            onClick={handleCsvUpload}
+            disabled={!csvFile || uploading}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            {uploading ? 'Sending Invitations...' : 'Send Invitations'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+#### Step 14: CSV Processing API
+**Action**: Handle bulk invitation processing
+**File**: `app/api/admin/bulk-invite/route.ts`
+
+```typescript
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user?.email?.endsWith('@yourdomain.com')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+  
+  const formData = await req.formData()
+  const csvFile = formData.get('csv') as File
+  
+  if (!csvFile) {
+    return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+  }
+  
+  const csvText = await csvFile.text()
+  const emails = csvText.split('\n')
+    .map(line => line.trim())
+    .filter(email => email && email.includes('@'))
+  
+  // Process each email for invitation
+  const results = []
+  for (const email of emails) {
+    try {
+      // Here you would integrate with Azure AD B2C Graph API
+      // to send invitations programmatically
+      
+      // Placeholder for now
+      console.log(`Sending invitation to: ${email}`)
+      results.push({ email, status: 'sent' })
+    } catch (error) {
+      results.push({ email, status: 'failed', error: error.message })
+    }
+  }
+  
+  return NextResponse.json({ results })
+}
+```
+
+#### Step 15: Domain Filtering Enhancement
+**Action**: Add application-level domain filtering
+**File**: `lib/auth.ts` (update the signIn callback)
+
+```typescript
+callbacks: {
+  async signIn({ user, account, profile }) {
+    const allowedDomains = [
+      'yourcompany.com',
+      'partnercorp.com',
+      'clientcompany.com'
+    ]
+    
+    const domain = user.email?.split('@')[1]
+    
+    if (!allowedDomains.includes(domain)) {
+      console.log(`[SECURITY] Blocked login from unauthorized domain: ${domain}`)
+      return false
+    }
+    
+    return true
+  },
+  // ... rest of callbacks
+}
+```
+
+---
+
+## Testing and Deployment Strategy
+
+### Phase 1 Testing (Azure Prepackaged - 30 minutes)
+1. **Test Azure Sign-in Flow**: Visit `/auth/signin` → Microsoft login → Dashboard access
+2. **Test Route Protection**: Direct dashboard access → Redirect to sign-in
+3. **Test Session Persistence**: Reload page → Stay logged in
+4. **Test Sign-out**: Sign out → Redirect to sign-in page
+
+### Phase 2 Testing (Custom Features - 1 hour)
+1. **Test Admin Access**: Admin user → Access admin panel
+2. **Test CSV Upload**: Upload test CSV → Verify invitations processed
+3. **Test Domain Filtering**: Try login with blocked domain → Access denied
+4. **Test Bulk Operations**: Large CSV file → Performance validation
+
+---
+
+## Azure AD B2C Benefits Summary
+
+### What You Get for Free (Prepackaged):
+✅ **Professional login screens** with Microsoft branding
+✅ **Multi-factor authentication** (when enabled)
+✅ **Password reset flows** with email integration
+✅ **Account recovery** and security features
+✅ **Invitation system** through Azure portal
+✅ **Unlimited external users** (no Google OAuth limits)
+✅ **Enterprise security** and compliance
+✅ **Mobile-optimized** login flows
+✅ **Custom branding** options (logos, colors)
+✅ **Social login providers** (Google, Facebook, etc. can be added)
+
+### What We Build Custom:
+🛠️ **CSV bulk invitation interface** (2-3 hours)
+🛠️ **Admin user management dashboard** (2-3 hours)
+🛠️ **Domain filtering logic** (30 minutes)
+🛠️ **Integration with existing freight dashboard** (1 hour)
+
+---
 
 ## Timeline Estimate
-- **Phase 1 (Infrastructure)**: 2-3 days
-- **Phase 2 (Components)**: 2-3 days  
-- **Phase 3 (Backend)**: 3-4 days
-- **Phase 4 (Testing)**: 2-3 days
-- **Phase 5 (Deployment)**: 1-2 days
-- **Total**: 10-15 days
 
-## Deployment Configuration
+**Phase 1 (Azure Setup + Basic Integration)**: 90 minutes
+- Azure tenant setup: 30 minutes
+- Environment configuration: 15 minutes  
+- NextAuth integration: 45 minutes
 
-### Required Environment Variables
-```bash
-# OAuth Configuration
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-MICROSOFT_CLIENT_ID=
-MICROSOFT_CLIENT_SECRET=
+**Phase 2 (Custom Features)**: 4-6 hours
+- Admin dashboard: 2-3 hours
+- CSV bulk invitation: 1-2 hours
+- Domain filtering: 30 minutes
+- Testing and refinement: 1 hour
 
-# Database
-DATABASE_URL=
+**Total Time**: 5.5-7.5 hours vs 10-15 days for custom OAuth solution
 
-# JWT
-JWT_SECRET=
-JWT_REFRESH_SECRET=
+---
 
-# Email Service
-SMTP_HOST=
-SMTP_PORT=
-SMTP_USER=
-SMTP_PASS=
+## Security Benefits Over Custom Solution
 
-# Application
-NEXTAUTH_URL=
-NEXTAUTH_SECRET=
-```
+✅ **Microsoft-grade security** (battle-tested by millions of enterprise users)
+✅ **Automatic security updates** (Microsoft handles patches)
+✅ **Compliance certifications** (SOC 2, ISO 27001, GDPR ready)
+✅ **Threat detection** and anomaly monitoring
+✅ **Zero security code to maintain** (Microsoft handles it)
+✅ **Professional audit trail** built-in
 
-### Vercel Configuration
-- **Node.js Version**: 18.x
-- **Build Command**: `npm run build`
-- **Framework Preset**: Next.js
-- **Root Directory**: `/`
-
-This plan provides a comprehensive roadmap for creating a modular, secure, and scalable authentication system that integrates seamlessly with the existing freight analytics dashboard while maintaining the ability to be parameterized for different deployments.
+This approach gives you enterprise-grade authentication in hours instead of weeks, with 90% of functionality coming from Microsoft's prepackaged solutions.
