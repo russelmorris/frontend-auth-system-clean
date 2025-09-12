@@ -1,0 +1,150 @@
+{
+  "accountId": "team_aePZB4xlWRneIVFokN19RQAb",
+  "autoExposeSystemEnvs": true,
+  "autoAssignCustomDomains": true,
+  "autoAssignCustomDomainsUpdatedBy": "system",
+  "buildCommand": null,
+  "createdAt": 1757647326698,
+  "devCommand": null,
+  "directoryListing": false,
+  "env": [
+    {
+      "key": "AUTH_DATABASE_URL",
+      "target": [
+        "production",
+        "preview",
+        "development"
+      ],
+      "configurationId": null,
+      "createdAt": 1757647326477,
+      "updatedAt": 1757647326477,
+      "createdBy": "AzSWGly8AVDCiiC3VQSRmiiI",
+      "updatedBy": null,
+      "id": "IINreEeU2c2szFhE",
+      "type": "encrypted",
+      "value": "bDNynpyC3ONmrXueZuHp5tSKfItBYURu9WYh842Uv1qJJjBBm2BeiL9qH13iy+gZ+7/NNzbrD4C0bBicgwMPLuGcdnDZk4ndQ3yxqIsB1cMCfoVnmuadT5IcOTTnfiFK76vbSW57ABFrnwGRA7sPMFT3u5NJKNV/ouPgfOro7t3qejxCQOWENr4D1dVuMXoS"
+    },
+    {
+      "key": "NEXTAUTH_URL",
+      "target": [
+        "production"
+      ],
+      "configurationId": null,
+      "createdAt": 1757647326477,
+      "updatedAt": 1757647326477,
+      "createdBy": "AzSWGly8AVDCiiC3VQSRmiiI",
+      "updatedBy": null,
+      "id": "6tkYcvSRD8rl8SSO",
+      "type": "plain",
+      "value": "https://frontend-auth-system.vercel.app"
+    },
+    {
+      "key": "NEXTAUTH_SECRET",
+      "target": [
+        "production",
+        "preview",
+        "development"
+      ],
+      "configurationId": null,
+      "createdAt": 1757647326477,
+      "updatedAt": 1757647326477,
+      "createdBy": "AzSWGly8AVDCiiC3VQSRmiiI",
+      "updatedBy": null,
+      "id": "x5bJtH8N2C92Eai8",
+      "type": "encrypted",
+      "value": "cIWEh719ndkzMVVWt77eIMuCiaN7VakQ1ljVmInP/wyrFHgXkn9T1aorJ3lQBcjy65QtNHx4lMiTM5qD79nScg=="
+    },
+    {
+      "key": "GOOGLE_CLIENT_ID",
+      "target": [
+        "production",
+        "preview",
+        "development"
+      ],
+      "configurationId": null,
+      "createdAt": 1757647326477,
+      "updatedAt": 1757647326477,
+      "createdBy": "AzSWGly8AVDCiiC3VQSRmiiI",
+      "updatedBy": null,
+      "id": "EWd6qgOg1o7B1Ju7",
+      "type": "encrypted",
+      "value": "M8GoyrAGuJOYc6t13TeLV68/VTvSKvuoKGUSkMIjpaCjeLpJJyjWX/RaSCo+LUsf"
+    },
+    {
+      "key": "GOOGLE_CLIENT_SECRET",
+      "target": [
+        "production",
+        "preview",
+        "development"
+      ],
+      "configurationId": null,
+      "createdAt": 1757647326477,
+      "updatedAt": 1757647326477,
+      "createdBy": "AzSWGly8AVDCiiC3VQSRmiiI",
+      "updatedBy": null,
+      "id": "IOR2Fh1UAZK6PAiu",
+      "type": "encrypted",
+      "value": "LFjOB3KnnA/7RC6Ax9kA28RQN8UkNATp/3tyH42gV9OlasKsTB2TX1jxtKWqfCJK"
+    }
+  ],
+  "framework": "nextjs",
+  "gitForkProtection": true,
+  "gitLFS": false,
+  "id": "prj_DJo75DlCgwDocMsCdQITrl9u3V9i",
+  "installCommand": null,
+  "lastRollbackTarget": null,
+  "lastAliasRequest": null,
+  "name": "frontend-auth-system",
+  "nodeVersion": "22.x",
+  "outputDirectory": null,
+  "productionDeploymentsFastLane": true,
+  "publicSource": null,
+  "defaultResourceConfig": {
+    "fluid": true,
+    "functionDefaultRegions": [
+      "iad1"
+    ],
+    "functionDefaultTimeout": 300,
+    "functionDefaultMemoryType": "standard",
+    "functionZeroConfigFailover": false,
+    "elasticConcurrencyEnabled": false
+  },
+  "resourceConfig": {
+    "fluid": true,
+    "functionDefaultRegions": [
+      "iad1"
+    ]
+  },
+  "rootDirectory": null,
+  "serverlessFunctionRegion": "iad1",
+  "skewProtectionMaxAge": 43200,
+  "sourceFilesOutsideRootDirectory": true,
+  "ssoProtection": {
+    "deploymentType": "all_except_custom_domains"
+  },
+  "updatedAt": 1757647326698,
+  "live": false,
+  "gitComments": {
+    "onCommit": false,
+    "onPullRequest": true
+  },
+  "gitProviderOptions": {
+    "createDeployments": "enabled"
+  },
+  "oidcTokenConfig": {
+    "enabled": true,
+    "issuerMode": "team"
+  },
+  "latestDeployments": [],
+  "targets": {},
+  "deploymentExpiration": {
+    "expirationDays": 180,
+    "expirationDaysProduction": 365,
+    "expirationDaysCanceled": 30,
+    "expirationDaysErrored": 90,
+    "deploymentsToKeep": 10
+  },
+  "features": {
+    "webAnalytics": false
+  }
+}
