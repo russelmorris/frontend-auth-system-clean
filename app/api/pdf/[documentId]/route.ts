@@ -3,10 +3,11 @@ import weaviate from 'weaviate-ts-client';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { documentId: string } }
+  { params }: { params: Promise<{ documentId: string }> }
 ) {
   try {
-    const documentId = params.documentId;
+    const resolvedParams = await params;
+    const documentId = resolvedParams.documentId;
     
     if (!documentId) {
       return NextResponse.json({ error: 'Document ID required' }, { status: 400 });

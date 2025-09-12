@@ -6,7 +6,12 @@ const nextConfig: NextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
-  }
+  },
+  serverExternalPackages: ['@prisma/client', 'bcryptjs'],
+  webpack: (config: any) => {
+    config.externals.push('@node-rs/argon2', '@node-rs/bcrypt');
+    return config;
+  },
 };
 
 export default nextConfig;
