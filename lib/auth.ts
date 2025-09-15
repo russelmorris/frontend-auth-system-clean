@@ -1,21 +1,33 @@
 import { NextAuthOptions } from "next-auth"
-import AzureADProvider from "next-auth/providers/azure-ad"
 
 export const authOptions: NextAuthOptions = {
   debug: true, // Enable debugging
   providers: [
-    AzureADProvider({
+    {
+      id: "azure-ad",
+      name: "Microsoft",
+      type: "oauth",
       clientId: process.env.AZURE_AD_CLIENT_ID!,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
-      tenantId: "organizations", // Only organizational accounts, no personal
       authorization: {
+        url: "https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize",
         params: {
           scope: "openid profile email",
-          prompt: "select_account" // Forces account selection screen
+          prompt: "select_account",
+          response_type: "code"
         }
       },
-      wellKnown: "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration"
-    })
+      token: "https://login.microsoftonline.com/organizations/oauth2/v2.0/token",
+      userinfo: "https://graph.microsoft.com/v1.0/me",
+      profile(profile) {
+        return {
+          id: profile.id,
+          name: profile.displayName || profile.name,
+          email: profile.mail || profile.userPrincipalName,
+          image: null
+        }
+      }
+    }
   ],
   // Use both localhost and IP address redirect URIs
   trustHost: true,

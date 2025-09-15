@@ -1,20 +1,161 @@
-# Code Documentation: Microsoft Entra External ID Frontend Authorization System
+# Code Documentation: Microsoft Azure AD Authentication System
 
-## Architecture Overview
+## Current Status: AUTHENTICATION LOOP ISSUE
 
-This is a Next.js 15.5.2 freight analytics dashboard with a **clean slate approach** to authentication using **Microsoft Entra External ID** (formerly Azure AD B2C). The system leverages Microsoft's next-generation enterprise-grade prepackaged identity services to provide secure, invitation-based access to the existing dashboard functionality.
+**CRITICAL**: Authentication system is experiencing persistent callback loops on both localhost and Vercel production environments. The issue has been comprehensively debugged and documented below.
+
+## Authentication Architecture (Current Implementation)
+
+This is a Next.js 15.5.2 freight analytics dashboard with Microsoft Azure AD authentication implementation. The system uses NextAuth.js with a custom OAuth provider configuration for Microsoft organizational accounts.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                MICROSOFT ENTRA EXTERNAL ID FLOW            │
+│                AZURE AD AUTHENTICATION FLOW                │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. User Request → NextAuth Middleware → Entra External ID  │
-│ 2. Microsoft Login → Entra Validation → JWT Token Return  │
-│ 3. Protected Routes → Session Validation → Dashboard       │
+│ 1. User Request → NextAuth → Azure AD OAuth                │
+│ 2. Microsoft Login → Token Exchange → Session Creation     │
+│ 3. Callback Redirect → Protected Routes → Dashboard        │
+│ ❌ ISSUE: Step 2-3 failing with OAuthCallback errors      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Current Status: Clean Frontend Ready for Microsoft Entra Integration
+## Comprehensive Debug Analysis (2025-09-15)
+
+### Root Cause Identified
+**Primary Issue**: `AADSTS9002313: Invalid request. Request is malformed or invalid`
+- Azure is rejecting the token exchange request during the OAuth callback
+- The authentication flow reaches Microsoft login but fails on return
+- Issue persists on both localhost and Vercel production environments
+
+### Debug Session Findings
+
+#### ✅ Working Components
+1. **NextAuth Configuration**: Correctly set up and functioning
+2. **State Cookie Management**: State cookies are created and stored properly
+3. **OAuth Flow Initiation**: Successfully redirects to Microsoft login
+4. **Microsoft Login Pages**: Reach login form and accept credentials
+5. **Callback Endpoint**: Receives requests but fails during token exchange
+
+#### ❌ Failing Components
+1. **Token Exchange**: Azure rejects the authorization code exchange
+2. **Account Type Detection**: Personal vs organizational account confusion
+3. **Callback Processing**: OAuthCallback errors causing loops
+4. **Session Creation**: No valid session created after authentication
+
+### Technical Details
+
+#### Current Azure Configuration
+- **Client ID**: `aae7d797-379a-4a62-a8f9-5b164c3f9f3e`
+- **Tenant**: `organizations` (multi-tenant)
+- **Redirect URIs**: 
+  - `http://localhost:3010/api/auth/callback/azure-ad`
+  - Vercel production URL (added)
+
+#### Authentication Flow Sequence
+1. ✅ User clicks "Continue with Microsoft"
+2. ✅ NextAuth creates state cookie and redirects to Azure
+3. ✅ Azure displays login form for `info@consultai.com.au`
+4. ❌ Account redirected to `login.live.com` (personal account)
+5. ❌ Token exchange fails with `AADSTS9002313`
+6. ❌ User redirected back to signin with `error=OAuthCallback`
+
+#### Error Analysis
+```
+[next-auth][error][OAUTH_CALLBACK_ERROR] 
+invalid_grant (AADSTS9002313: Invalid request. Request is malformed or invalid.
+Trace ID: 70823286-54df-4607-b29c-89246f8b5700
+```
+
+### Account Configuration Issue
+The email `info@consultai.com.au` is being treated as a **personal Microsoft account** rather than an organizational account, causing redirect to `login.live.com` instead of organizational authentication.
+
+## Current Implementation Status
+
+### Files Modified
+- ✅ `lib/auth.ts` - Custom OAuth provider configuration
+- ✅ `app/api/auth/[...nextauth]/route.ts` - NextAuth API endpoints
+- ✅ `app/auth/signin/page.tsx` - Sign-in page
+- ✅ `app/layout.tsx` - Session provider wrapper
+- ✅ `components/providers/SessionProvider.tsx` - Client-side session provider
+- ✅ `middleware.ts` - Route protection
+- ✅ `.env` - Environment variables configured
+
+### Current Authentication Configuration
+```typescript
+// lib/auth.ts - Custom OAuth Provider
+export const authOptions: NextAuthOptions = {
+  debug: true,
+  providers: [
+    {
+      id: "azure-ad",
+      name: "Microsoft",
+      type: "oauth",
+      clientId: process.env.AZURE_AD_CLIENT_ID!,
+      clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
+      authorization: {
+        url: "https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize",
+        params: {
+          scope: "openid profile email",
+          prompt: "select_account",
+          response_type: "code"
+        }
+      },
+      token: "https://login.microsoftonline.com/organizations/oauth2/v2.0/token",
+      userinfo: "https://graph.microsoft.com/v1.0/me",
+      profile(profile) {
+        return {
+          id: profile.id,
+          name: profile.displayName || profile.name,
+          email: profile.mail || profile.userPrincipalName,
+          image: null
+        }
+      }
+    }
+  ],
+  trustHost: true,
+  useSecureCookies: false,
+  // ... rest of configuration
+}
+```
+
+### Comprehensive Debugging Completed
+1. ✅ **Selenium/Playwright Testing** - Automated flow testing
+2. ✅ **Network Request Analysis** - Detailed request/response logging
+3. ✅ **State Cookie Analysis** - Cookie creation and persistence verified
+4. ✅ **Manual Callback Simulation** - Direct callback URL testing
+5. ✅ **Server Log Analysis** - Error identification and tracing
+6. ✅ **Multiple Provider Configurations** - Both AzureADProvider and custom OAuth tested
+
+### Testing Tools Created
+- `comprehensive_auth_debug.js` - Full authentication flow testing
+- `test_manual_callback.js` - Manual callback simulation
+- `test_new_auth.js` - Custom OAuth provider testing
+- `azure_navigation_guide.js` - Azure portal configuration guide
+
+## Next Debugging Strategy
+
+### Potential Solutions to Investigate
+1. **Account Type Correction**
+   - Verify if `info@consultai.com.au` needs to be added as organizational account
+   - Test with known organizational Microsoft account
+   - Consider creating dedicated test user in Azure tenant
+
+2. **Azure App Registration Review**
+   - Verify API permissions in Azure portal
+   - Check certificate/secret expiration
+   - Review supported account types configuration
+
+3. **Alternative Provider Approach**
+   - Test with different OAuth provider (Google) to isolate Azure-specific issues
+   - Try Azure AD B2C instead of regular Azure AD
+   - Consider Microsoft Graph API direct integration
+
+4. **Environment-Specific Testing**
+   - Test with different email accounts
+   - Try authentication on different development environments
+   - Verify production vs development environment differences
+
+## Current Status: Ready for Focused Debugging
 
 The codebase has been **completely cleaned** of all previous authentication implementations to provide a fresh start for Microsoft Entra External ID integration. This ensures:
 - No conflicting authentication libraries
