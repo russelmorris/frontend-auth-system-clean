@@ -1,22 +1,22 @@
-# Code Documentation: Azure AD B2C Frontend Authorization System
+# Code Documentation: Microsoft Entra External ID Frontend Authorization System
 
 ## Architecture Overview
 
-This is a Next.js 15.5.2 freight analytics dashboard with a **clean slate approach** to authentication using **Microsoft Azure AD B2C**. The system leverages Microsoft's enterprise-grade prepackaged identity services to provide secure, invitation-based access to the existing dashboard functionality.
+This is a Next.js 15.5.2 freight analytics dashboard with a **clean slate approach** to authentication using **Microsoft Entra External ID** (formerly Azure AD B2C). The system leverages Microsoft's next-generation enterprise-grade prepackaged identity services to provide secure, invitation-based access to the existing dashboard functionality.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    AZURE AD B2C FLOW                       │
+│                MICROSOFT ENTRA EXTERNAL ID FLOW            │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. User Request → NextAuth Middleware → Azure AD B2C       │
-│ 2. Microsoft Login → B2C Validation → JWT Token Return    │
+│ 1. User Request → NextAuth Middleware → Entra External ID  │
+│ 2. Microsoft Login → Entra Validation → JWT Token Return  │
 │ 3. Protected Routes → Session Validation → Dashboard       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Current Status: Clean Frontend Ready for Azure Integration
+## Current Status: Clean Frontend Ready for Microsoft Entra Integration
 
-The codebase has been **completely cleaned** of all previous authentication implementations to provide a fresh start for Azure AD B2C integration. This ensures:
+The codebase has been **completely cleaned** of all previous authentication implementations to provide a fresh start for Microsoft Entra External ID integration. This ensures:
 - No conflicting authentication libraries
 - Clean dependency tree
 - Fresh environment variable space

@@ -1,12 +1,12 @@
-# Project Plan: Azure AD B2C Frontend Authorization System
+# Project Plan: Microsoft Entra External ID Frontend Authorization System
 
 ## Project Overview
-Implement a fast-track Azure AD B2C authentication system that leverages Microsoft's prepackaged identity services to create a secure, invitation-based authorization gate for the existing freight analytics dashboard.
+Implement a fast-track Microsoft Entra External ID authentication system that leverages Microsoft's next-generation prepackaged identity services to create a secure, invitation-based authorization gate for the existing freight analytics dashboard.
 
 ## Core Objective
-**"Enterprise-grade authentication with minimal custom development using Azure AD B2C's prepackaged solutions"**
+**"Enterprise-grade authentication with minimal custom development using Microsoft Entra External ID's prepackaged solutions"**
 
-## Phase 1: Azure AD B2C Setup (Prepackaged Solutions - 90 minutes)
+## Phase 1: Microsoft Entra External ID Setup (Prepackaged Solutions - 90 minutes)
 **Objective**: Get Microsoft's prepackaged authentication running immediately
 
 ### PART A: User Instructions for Azure Setup (30 minutes)
