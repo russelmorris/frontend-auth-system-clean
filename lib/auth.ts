@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth"
 import AzureADProvider from "next-auth/providers/azure-ad"
 
 export const authOptions: NextAuthOptions = {
+  debug: true, // Enable debugging
   providers: [
     AzureADProvider({
       clientId: process.env.AZURE_AD_CLIENT_ID!,
@@ -13,24 +14,17 @@ export const authOptions: NextAuthOptions = {
           prompt: "select_account" // Forces account selection screen
         }
       },
-      checks: ["state"] // Explicitly enable state parameter checking
+      wellKnown: "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration"
     })
   ],
+  // Use both localhost and IP address redirect URIs
+  trustHost: true,
+  useSecureCookies: false,
   session: {
     strategy: 'jwt',
     maxAge: 24 * 60 * 60, // 24 hours
   },
-  cookies: {
-    pkceCodeVerifier: {
-      name: "next-auth.pkce.code_verifier",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: false // Set to false for localhost
-      }
-    }
-  },
+  // Remove custom cookie configuration to use NextAuth defaults
   callbacks: {
     async signIn({ user, account, profile }) {
       // Debug logging
