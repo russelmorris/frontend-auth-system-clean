@@ -1,26 +1,6 @@
 import NextAuth from "next-auth"
 import AzureADProvider from "next-auth/providers/azure-ad"
 import { NextAuthOptions } from "next-auth"
-import fs from 'fs'
-import path from 'path'
-
-// Load whitelist
-function loadWhitelist(): string[] {
-  try {
-    const whitelistPath = path.join(process.cwd(), 'auth-module', 'whitelist.json')
-    const whitelistData = fs.readFileSync(whitelistPath, 'utf8')
-    const whitelist = JSON.parse(whitelistData)
-    return whitelist.approvedEmails.map((email: string) => email.toLowerCase())
-  } catch (error) {
-    console.error('Error loading whitelist:', error)
-    // Fallback to environment variable if file not found
-    const envWhitelist = process.env.APPROVED_EMAILS
-    if (envWhitelist) {
-      return envWhitelist.split(',').map(email => email.trim().toLowerCase())
-    }
-    return []
-  }
-}
 
 const authOptions: NextAuthOptions = {
   debug: true,
@@ -52,32 +32,12 @@ const authOptions: NextAuthOptions = {
 
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Load approved emails
-      const approvedEmails = loadWhitelist()
-
-      // Check if user's email is in the whitelist
-      const userEmail = user?.email?.toLowerCase()
-
-      if (!userEmail) {
-        console.log("Sign in blocked: No email found")
-        return false
-      }
-
-      if (approvedEmails.length === 0) {
-        // If no whitelist is configured, allow all (for initial setup)
-        console.log("Warning: No whitelist configured, allowing all users")
-        return true
-      }
-
-      const isApproved = approvedEmails.includes(userEmail)
-
-      if (isApproved) {
-        console.log("Sign in approved for:", userEmail)
-      } else {
-        console.log("Sign in blocked - email not whitelisted:", userEmail)
-      }
-
-      return isApproved
+      console.log("Sign in successful:", {
+        email: user?.email,
+        provider: account?.provider,
+        issuer: account?.issuer
+      })
+      return true
     },
     async jwt({ token, user, account }) {
       if (account) {

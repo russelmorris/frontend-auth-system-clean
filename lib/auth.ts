@@ -10,14 +10,21 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.AZURE_AD_CLIENT_ID!,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
       authorization: {
-        url: "https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize",
+        url: `https://login.microsoftonline.com/common/oauth2/v2.0/authorize`,
         params: {
-          scope: "openid profile email",
+          scope: "openid profile email User.Read",
           prompt: "select_account",
-          response_type: "code"
+          response_type: "code",
+          response_mode: "query"
         }
       },
-      token: "https://login.microsoftonline.com/organizations/oauth2/v2.0/token",
+      token: {
+        url: `https://login.microsoftonline.com/common/oauth2/v2.0/token`,
+        params: {
+          scope: "openid profile email User.Read",
+          grant_type: "authorization_code"
+        }
+      },
       userinfo: "https://graph.microsoft.com/v1.0/me",
       profile(profile) {
         return {
@@ -32,6 +39,44 @@ export const authOptions: NextAuthOptions = {
   // Use both localhost and IP address redirect URIs
   trustHost: true,
   useSecureCookies: false,
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: false
+      }
+    },
+    callbackUrl: {
+      name: `next-auth.callback-url`,
+      options: {
+        sameSite: 'lax',
+        path: '/',
+        secure: false
+      }
+    },
+    csrfToken: {
+      name: `next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: false
+      }
+    },
+    state: {
+      name: `next-auth.state`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: false,
+        maxAge: 900 // 15 minutes
+      }
+    }
+  },
   session: {
     strategy: 'jwt',
     maxAge: 24 * 60 * 60, // 24 hours

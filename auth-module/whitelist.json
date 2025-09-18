@@ -1,0 +1,7 @@
+{
+  "approvedEmails": [
+    "info@consultai.com.au",
+    "admin@example.com"
+  ],
+  "comment": "Add approved email addresses here. Both personal (@outlook.com, @live.com) and work accounts are supported."
+}

@@ -1,0 +1,91 @@
+{
+  "timestamp": "2025-09-15T07:31:10.473Z",
+  "rootCause": "Personal Microsoft account conflict - info@consultai.com.au not in organizational tenant",
+  "recommendedSolution": "Azure AD B2C implementation for external user management",
+  "estimatedImplementationTime": "2-3 hours",
+  "testResults": {
+    "totalSteps": 7,
+    "successfulSteps": 7,
+    "failedSteps": 0,
+    "totalErrors": 0,
+    "consoleErrors": 1,
+    "redirectUrls": [
+      "https://login.microsoftonline.com/f8f89417-45e3-4259-91cc-34e477662944/oauth2/v2.0/authorize?client_id=aae7d797-379a-4a62-a8f9-5b164c3f9f3e&scope=openid%20profile%20email&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Fauth%2Fcallback%2Fazure-ad&prompt=select_account&state=oACTplq8RucIEWWHTfb-mQNkX29qrk79J9I43nZ_Rbs&sso_reload=true",
+      "https://login.live.com/login.srf?wa=wsignin1.0&wtrealm=urn%3afederation%3aMicrosoftOnline&wctx=estsredirect%3d2%26estsrequest%3drQQIABAAKgMyLjA6JGFhZTdkNzk3LTM3OWEtNGE2Mi1hOGY5LTViMTY0YzNmOWYzZXISChBe1WnWWaR2Q4-TvTiFJZ_LuAEB0AEB6AEB2gIPT0F1dGgyQXV0aG9yaXpl6gIOc2VsZWN0X2FjY291bnSaAytvQUNUcGxxOFJ1Y0lFV1dIVGZiLW1RTmtYMjlxcms3OUo5STQzblpfUmJzsgMkZjhmODk0MTctNDVlMy00MjU5LTkxY2MtMzRlNDc3NjYyOTQ0ygMUb3BlbmlkIHByb2ZpbGUgZW1haWzYAwHQBAHqBAwwAzoICAoQABgAIAD4BAGiBRIKEATyQ8bwAaNOos3vVwAYAQDKBS9HcDJWT3UydVV0ZG4ybThxb3RNUTV5TkNDUU1iN2J2M1UrbzNwZGFXMmRRPTY6MZAGAfAGAYgHALoJMGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMS9hcGkvYXV0aC9jYWxsYmFjay9henVyZS1hZMANAPgOqMXYkZmF_e5I6g8sR240ZzlCZmtpMGs4RE9Bek5TbXhGcHlYMFExM0xUakVUaUJNOHVFRFNBRT2wEADgEADgEQD4EZAC0&uaid=d669d55ea45943768f93bd3885259fcb&username=info%40consultai.com.au&login_hint=info%40consultai.com.au"
+    ]
+  },
+  "solutions": [
+    {
+      "priority": 1,
+      "title": "Azure AD B2C Implementation (RECOMMENDED)",
+      "timeEstimate": "2-3 hours",
+      "difficulty": "Medium",
+      "pros": [
+        "Designed for external users",
+        "No user limits",
+        "Prepackaged UI from Microsoft",
+        "Handles personal/business account conflicts automatically",
+        "Production-ready security"
+      ],
+      "cons": [
+        "Requires new Azure resource setup",
+        "Different configuration than regular Azure AD"
+      ],
+      "steps": [
+        "Create Azure AD B2C tenant",
+        "Configure user flows for sign-up/sign-in",
+        "Update application configuration",
+        "Test with external users"
+      ]
+    },
+    {
+      "priority": 2,
+      "title": "Add User to Existing Azure AD Tenant",
+      "timeEstimate": "30 minutes",
+      "difficulty": "Easy",
+      "pros": [
+        "Quick fix if feasible",
+        "Uses existing infrastructure",
+        "No code changes needed"
+      ],
+      "cons": [
+        "May not be possible with external email domains",
+        "Requires tenant admin access",
+        "Not scalable for multiple external users"
+      ],
+      "steps": [
+        "Access Azure portal as tenant admin",
+        "Navigate to Azure Active Directory > Users",
+        "Add external user with info@consultai.com.au",
+        "Test authentication"
+      ]
+    },
+    {
+      "priority": 3,
+      "title": "Multi-Tenant Application Configuration",
+      "timeEstimate": "1-2 hours",
+      "difficulty": "Hard",
+      "pros": [
+        "Allows users from any organization",
+        "Uses existing Azure AD setup"
+      ],
+      "cons": [
+        "Complex consent workflows",
+        "Still may not work with personal accounts",
+        "Requires admin consent from user organizations"
+      ],
+      "steps": [
+        "Configure app registration for multi-tenant",
+        "Update supported account types",
+        "Implement admin consent workflow",
+        "Test with multiple tenants"
+      ]
+    }
+  ],
+  "nextSteps": [
+    "Choose solution approach (Azure AD B2C recommended)",
+    "Follow implementation guide",
+    "Test with real external users",
+    "Deploy to production with proper domains"
+  ]
+}

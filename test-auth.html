@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Azure AD Auth</title>
+</head>
+<body>
+    <h1>Test Azure AD Authentication</h1>
+    <p>Click the link below to test authentication directly:</p>
+
+    <h2>Direct Azure AD Login URL:</h2>
+    <a href="https://login.microsoftonline.com/85a3833a-20b8-479e-bf9f-bcda47fae437/oauth2/v2.0/authorize?client_id=bfc2a4f4-4357-40c9-8ed6-cab30ab946a8&response_type=code&redirect_uri=http://localhost:3100/api/auth/callback/azure-ad&scope=openid%20profile%20email&prompt=select_account" target="_blank">
+        Test Direct Login to Your Tenant
+    </a>
+
+    <h2>Important:</h2>
+    <ul>
+        <li>Make sure you select the WORK account, not personal</li>
+        <li>The account must exist in tenant: 85a3833a-20b8-479e-bf9f-bcda47fae437</li>
+        <li>If you see "Pick an account", choose the work account</li>
+    </ul>
+
+    <h2>Common Login (will prompt for account selection):</h2>
+    <a href="https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=bfc2a4f4-4357-40c9-8ed6-cab30ab946a8&response_type=code&redirect_uri=http://localhost:3100/api/auth/callback/azure-ad&scope=openid%20profile%20email&prompt=select_account" target="_blank">
+        Test Common Login (Multiple Tenants)
+    </a>
+</body>
+</html>
