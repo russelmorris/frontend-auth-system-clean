@@ -44,11 +44,9 @@ export default function SignIn() {
           {loadingWork ? 'Signing in...' : 'Sign in with Microsoft'}
         </button>
 
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-xs text-blue-800">
-            <strong>Supported:</strong> Both personal Microsoft accounts and work/school accounts
-          </p>
-        </div>
+        <p className="text-sm text-center text-gray-600 mt-2">
+          Use Work or Personal Account
+        </p>
 
         <p className="text-xs text-center text-gray-500">
           By signing in, you agree to our terms of service and privacy policy.
