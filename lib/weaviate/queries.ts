@@ -11,8 +11,8 @@ export async function searchQuotes(options: {
   const client = await getWeaviateClient();
   
   try {
-    // Use FreightQuotes_Opus collection for better extraction
-    const collection = client.collections.get('FreightQuotes_Opus');
+    // Use FreightQuotes_Prefect collection which has data
+    const collection = client.collections.get('FreightQuotes_Prefect');
     
     // Build the query
     let results;
@@ -34,12 +34,18 @@ export async function searchQuotes(options: {
           'total_value',
           'currency',
           'origin_port',
+          'origin_city',
+          'origin_country',
           'destination_port',
+          'destination_city',
+          'destination_country',
           'line_item_count',
           'extraction_confidence',
           'margin_percentage',
-          'model_used',
-          'processed_at'
+          'extraction_model',
+          'extracted_at',
+          'date_issued',
+          'valid_until'
         ]
       });
     } else {
@@ -54,12 +60,18 @@ export async function searchQuotes(options: {
           'total_value',
           'currency',
           'origin_port',
+          'origin_city',
+          'origin_country',
           'destination_port',
+          'destination_city',
+          'destination_country',
           'line_item_count',
           'extraction_confidence',
           'margin_percentage',
-          'model_used',
-          'processed_at'
+          'extraction_model',
+          'extracted_at',
+          'date_issued',
+          'valid_until'
         ]
       });
     }
@@ -76,7 +88,7 @@ export async function getQuoteById(id: string): Promise<FreightQuote | null> {
   const client = await getWeaviateClient();
   
   try {
-    const collection = client.collections.get('FreightQuotes_Opus');
+    const collection = client.collections.get('FreightQuotes_Prefect');
     const result = await collection.query.fetchObjectById(id);
     
     if (!result) return null;
@@ -92,7 +104,7 @@ export async function getQuoteLineItems(documentId: string): Promise<any[]> {
   const client = await getWeaviateClient();
   
   try {
-    const collection = client.collections.get('FreightChunks_Opus');
+    const collection = client.collections.get('FreightChunks_Prefect');
     
     // Get chunks for this document
     const results = await collection.query.fetchObjects({
@@ -130,7 +142,7 @@ export async function getAllQuotes(options: { limit: number; offset: number }): 
   const client = await getWeaviateClient();
   
   try {
-    const collection = client.collections.get('FreightQuotes_Opus');
+    const collection = client.collections.get('FreightQuotes_Prefect');
     const results = await collection.query.fetchObjects({
       limit: options.limit,
       offset: options.offset,
@@ -139,17 +151,21 @@ export async function getAllQuotes(options: { limit: number; offset: number }): 
         'file_name',
         'quote_reference',
         'customer_name',
-        'total_amount',
+        'total_value',
         'currency',
         'origin_port',
+        'origin_city',
+        'origin_country',
         'destination_port',
-        'shipment_mode',
-        'supplier_name',
+        'destination_city',
+        'destination_country',
         'date_issued',
         'valid_until',
-        'line_items_count',
+        'line_item_count',
         'extraction_confidence',
-        'full_extraction'
+        'margin_percentage',
+        'extraction_model',
+        'extracted_at'
       ]
     });
     
@@ -170,7 +186,7 @@ export async function getAggregations(options: {
   const client = await getWeaviateClient();
   
   try {
-    const collection = client.collections.get('FreightQuotes_Opus');
+    const collection = client.collections.get('FreightQuotes_Prefect');
     
     // Build aggregation query
     const aggregation = await collection.aggregate.overAll({
@@ -193,7 +209,7 @@ export async function getFilterOptions(fields?: string[], currentFilters?: Searc
   const client = await getWeaviateClient();
   
   try {
-    const collection = client.collections.get('FreightQuotes_Opus');
+    const collection = client.collections.get('FreightQuotes_Prefect');
     const options: Record<string, string[]> = {};
     
     const fieldsToFetch = fields || ['customer_name', 'origin_port', 'destination_port', 'shipment_mode', 'supplier_name'];
@@ -264,7 +280,7 @@ function transformToFreightQuote(obj: any): FreightQuote {
       ...extractedData.financialMetrics
     },
     extractionConfidence: props.extraction_confidence,
-    processedAt: props.processed_at,
-    modelUsed: props.model_used
+    processedAt: props.extracted_at || props.processed_at,
+    modelUsed: props.extraction_model || props.model_used
   };
 }

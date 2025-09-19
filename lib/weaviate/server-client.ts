@@ -28,10 +28,10 @@ export async function searchQuotes(query: string, limit: number = 20) {
   try {
     const client = getWeaviateClient();
     
-    // Try to search in FreightQuotes_Opus collection
+    // Try to search in FreightQuotes_Prefect collection
     const result = await client.graphql
       .get()
-      .withClassName('FreightQuotes_Opus')
+      .withClassName('FreightQuotes_Prefect')
       .withFields(`
         document_id
         quote_reference
@@ -51,7 +51,7 @@ export async function searchQuotes(query: string, limit: number = 20) {
           distance
         }
       `)
-      // FreightQuotes_Opus doesn't have text vectorization, use simple fetch
+      // FreightQuotes_Prefect doesn't have text vectorization, use simple fetch
       .withWhere({
         path: ['customer_name'],
         operator: 'Like',
@@ -61,7 +61,7 @@ export async function searchQuotes(query: string, limit: number = 20) {
       .do();
     
     // Transform the results to match our FreightQuote type
-    const quotes = result.data?.Get?.FreightQuotes_Opus || [];
+    const quotes = result.data?.Get?.FreightQuotes_Prefect || [];
     
     return quotes.map((q: any) => {
       // Parse the full_extraction JSON if available
