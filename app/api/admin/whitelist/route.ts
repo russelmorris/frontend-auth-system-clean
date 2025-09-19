@@ -20,9 +20,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       approvedEmails: whitelist,
-      storageType: WhitelistStorage.isUsingKV() ? 'Vercel KV (Persistent)' : 'Local File',
-      note: WhitelistStorage.isUsingKV()
-        ? 'Data is stored persistently in Vercel KV'
+      storageType: WhitelistStorage.isUsingRedis() ? 'Redis (Persistent)' : 'Local File',
+      note: WhitelistStorage.isUsingRedis()
+        ? 'Data is stored persistently in Redis'
         : 'Data is stored locally in whitelist.json'
     })
   } catch (error) {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success,
       message,
-      storageType: WhitelistStorage.isUsingKV() ? 'Vercel KV' : 'Local File'
+      storageType: WhitelistStorage.isUsingRedis() ? 'Redis' : 'Local File'
     })
   } catch (error) {
     console.error('Error in POST /api/admin/whitelist:', error)

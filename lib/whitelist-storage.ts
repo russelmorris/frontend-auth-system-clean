@@ -1,40 +1,42 @@
-// Whitelist storage abstraction that works locally and on Vercel
+// Whitelist storage abstraction that works locally and on Vercel/Redis
 import fs from 'fs/promises'
 import path from 'path'
-
-// Dynamic import for Vercel KV to avoid errors when not configured
-let kv: any = null
-
-async function getKV() {
-  if (!kv && process.env.KV_REST_API_URL) {
-    try {
-      const kvModule = await import('@vercel/kv')
-      kv = kvModule.kv
-    } catch (error) {
-      console.log('Vercel KV not available:', error)
-    }
-  }
-  return kv
-}
+import { getRedisClient } from './redis-client'
 
 export class WhitelistStorage {
   private static WHITELIST_KEY = 'email-whitelist'
   private static LOCAL_FILE = 'whitelist.json'
 
   static async getWhitelist(): Promise<string[]> {
-    // Try Vercel KV first (production)
-    const kvInstance = await getKV()
-    if (kvInstance) {
+    // Try Redis first (production)
+    const redis = getRedisClient()
+    if (redis) {
       try {
-        console.log('Loading whitelist from Vercel KV')
-        const whitelist = await kvInstance.get<string[]>(this.WHITELIST_KEY)
-        return whitelist || []
+        console.log('Loading whitelist from Redis')
+        const data = await redis.get(this.WHITELIST_KEY)
+        if (data) {
+          const whitelist = JSON.parse(data)
+          return Array.isArray(whitelist) ? whitelist : []
+        }
+
+        // If no data in Redis, try to migrate from local file
+        console.log('No data in Redis, checking for local file to migrate...')
+        const localWhitelist = await this.loadFromFile()
+        if (localWhitelist.length > 0) {
+          console.log('Migrating local whitelist to Redis...')
+          await this.saveWhitelist(localWhitelist)
+          return localWhitelist
+        }
       } catch (error) {
-        console.error('Error reading from KV:', error)
+        console.error('Error reading from Redis:', error)
       }
     }
 
     // Fall back to local file (development)
+    return this.loadFromFile()
+  }
+
+  private static async loadFromFile(): Promise<string[]> {
     try {
       console.log('Loading whitelist from local file')
       const whitelistPath = path.join(process.cwd(), this.LOCAL_FILE)
@@ -80,15 +82,15 @@ export class WhitelistStorage {
   }
 
   private static async saveWhitelist(whitelist: string[]): Promise<void> {
-    // Try Vercel KV first (production)
-    const kvInstance = await getKV()
-    if (kvInstance) {
+    // Try Redis first (production)
+    const redis = getRedisClient()
+    if (redis) {
       try {
-        console.log('Saving whitelist to Vercel KV')
-        await kvInstance.set(this.WHITELIST_KEY, whitelist)
+        console.log('Saving whitelist to Redis')
+        await redis.set(this.WHITELIST_KEY, JSON.stringify(whitelist))
         return
       } catch (error) {
-        console.error('Error saving to KV:', error)
+        console.error('Error saving to Redis:', error)
       }
     }
 
@@ -107,7 +109,7 @@ export class WhitelistStorage {
     }
   }
 
-  static isUsingKV(): boolean {
-    return !!process.env.KV_REST_API_URL
+  static isUsingRedis(): boolean {
+    return !!getRedisClient()
   }
 }

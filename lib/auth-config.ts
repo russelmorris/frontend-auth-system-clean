@@ -6,7 +6,7 @@ import { WhitelistStorage } from './whitelist-storage'
 async function loadWhitelist(): Promise<string[]> {
   try {
     const whitelist = await WhitelistStorage.getWhitelist()
-    console.log(`Loading whitelist from ${WhitelistStorage.isUsingKV() ? 'Vercel KV' : 'local file'}:`, whitelist.length, 'emails')
+    console.log(`Loading whitelist from ${WhitelistStorage.isUsingRedis() ? 'Redis' : 'local file'}:`, whitelist.length, 'emails')
     return whitelist.map((email: string) => email.toLowerCase())
   } catch (error) {
     console.error('Error loading whitelist:', error)
