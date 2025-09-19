@@ -1,30 +1,23 @@
 import { NextAuthOptions } from "next-auth"
 import AzureADProvider from "next-auth/providers/azure-ad"
-import fs from 'fs'
-import path from 'path'
+import { WhitelistStorage } from './whitelist-storage'
 
-// Load whitelist
-function loadWhitelist(): string[] {
-  // First try JSON file (preferred - allows easy editing)
+// Load whitelist using the unified storage system
+async function loadWhitelist(): Promise<string[]> {
   try {
-    const whitelistPath = path.join(process.cwd(), 'whitelist.json')
-    const whitelistData = fs.readFileSync(whitelistPath, 'utf8')
-    const whitelist = JSON.parse(whitelistData)
-    console.log('Loading whitelist from JSON file:', whitelist.approvedEmails.length, 'emails')
-    return whitelist.approvedEmails.map((email: string) => email.toLowerCase())
+    const whitelist = await WhitelistStorage.getWhitelist()
+    console.log(`Loading whitelist from ${WhitelistStorage.isUsingKV() ? 'Vercel KV' : 'local file'}:`, whitelist.length, 'emails')
+    return whitelist.map((email: string) => email.toLowerCase())
   } catch (error) {
-    console.log('JSON file not found, trying environment variable')
+    console.error('Error loading whitelist:', error)
+    // Fallback to environment variable
+    const envWhitelist = process.env.APPROVED_EMAILS
+    if (envWhitelist) {
+      console.log('Loading whitelist from environment variable')
+      return envWhitelist.split(',').map(email => email.trim().toLowerCase())
+    }
+    return []
   }
-
-  // Fallback to environment variable
-  const envWhitelist = process.env.APPROVED_EMAILS
-  if (envWhitelist) {
-    console.log('Loading whitelist from environment variable')
-    return envWhitelist.split(',').map(email => email.trim().toLowerCase())
-  }
-
-  console.error('No whitelist configuration found - allowing no users')
-  return []
 }
 
 export const authOptions: NextAuthOptions = {
@@ -58,7 +51,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       // Load approved emails
-      const approvedEmails = loadWhitelist()
+      const approvedEmails = await loadWhitelist()
 
       // Check if user's email is in the whitelist
       const userEmail = user?.email?.toLowerCase()
