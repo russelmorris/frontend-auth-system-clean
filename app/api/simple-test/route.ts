@@ -20,7 +20,7 @@ export async function GET() {
     // Simple query without any filters or vector search
     const result = await client.graphql
       .get()
-      .withClassName('FreightQuotes_Opus')
+      .withClassName('FreightQuotes_Prefect')
       .withFields(`
         document_id
         quote_reference
@@ -34,7 +34,7 @@ export async function GET() {
       .withLimit(5)
       .do();
 
-    const quotes = result.data?.Get?.FreightQuotes_Opus || [];
+    const quotes = result.data?.Get?.FreightQuotes_Prefect || [];
     
     return NextResponse.json({
       success: true,

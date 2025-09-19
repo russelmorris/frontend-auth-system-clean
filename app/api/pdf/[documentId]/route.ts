@@ -57,11 +57,11 @@ export async function GET(
       console.log('FreightQuotes_Vectorized not available or no PDF data');
     }
 
-    // Try FreightQuotes_Opus collection as fallback
+    // Try FreightQuotes_Prefect collection as fallback
     try {
       const result = await client.graphql
         .get()
-        .withClassName('FreightQuotes_Opus')
+        .withClassName('FreightQuotes_Prefect')
         .withFields('document_id quote_reference file_name pdf_base64')
         .withWhere({
           path: ['document_id'],
@@ -70,7 +70,7 @@ export async function GET(
         })
         .do();
       
-      const quotes = result.data?.Get?.FreightQuotes_Opus || [];
+      const quotes = result.data?.Get?.FreightQuotes_Prefect || [];
       
       if (quotes.length > 0 && quotes[0].pdf_base64) {
         return NextResponse.json({
@@ -82,7 +82,7 @@ export async function GET(
         });
       }
     } catch {
-      console.log('FreightQuotes_Opus not available or no PDF data');
+      console.log('FreightQuotes_Prefect not available or no PDF data');
     }
 
     // No PDF found

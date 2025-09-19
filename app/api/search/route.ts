@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     // Build the query
     let query = client.graphql
       .get()
-      .withClassName('FreightQuotes_Opus')
+      .withClassName('FreightQuotes_Prefect')
       .withFields(`
         document_id
         quote_reference
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     }
     
     const result = await query.do();
-    const quotes = result.data?.Get?.FreightQuotes_Opus || [];
+    const quotes = result.data?.Get?.FreightQuotes_Prefect || [];
     
     // Transform to expected format
     const transformedQuotes = quotes.map((q: Record<string, unknown>) => {
