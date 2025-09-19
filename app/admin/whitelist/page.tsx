@@ -15,7 +15,7 @@ export default function WhitelistManager() {
   const [message, setMessage] = useState('')
 
   // Only allow specific admin emails to manage the whitelist
-  const adminEmails = ['russ@skyeam.com.au', 'info@consultai.com.au']
+  const adminEmails = ['russ@skyeam.com.au', 'russel.d.j.morris@gmail.com', 'info@consultai.com.au']
 
   useEffect(() => {
     if (status === 'loading') return
@@ -25,7 +25,13 @@ export default function WhitelistManager() {
       return
     }
 
+    // Debug logging
+    console.log('Session user email:', session.user?.email)
+    console.log('Admin emails:', adminEmails)
+    console.log('Is admin?', adminEmails.includes(session.user?.email?.toLowerCase() || ''))
+
     if (!adminEmails.includes(session.user?.email?.toLowerCase() || '')) {
+      console.log('Redirecting to dashboard - user is not admin')
       window.location.href = '/dashboard'
       return
     }

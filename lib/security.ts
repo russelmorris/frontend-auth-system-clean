@@ -1,7 +1,7 @@
 // Security utilities for bulletproof authentication protection
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '@/lib/auth-config'
 
 // CSRF Protection
 export function validateCSRFToken(request: NextRequest): boolean {

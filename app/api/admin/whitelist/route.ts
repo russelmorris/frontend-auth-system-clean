@@ -5,7 +5,7 @@ import fs from 'fs/promises'
 import path from 'path'
 
 // Admin emails who can manage the whitelist
-const ADMIN_EMAILS = ['russ@skyeam.com.au', 'info@consultai.com.au'] // Add your admin emails here
+const ADMIN_EMAILS = ['russ@skyeam.com.au', 'russel.d.j.morris@gmail.com', 'info@consultai.com.au'] // Add your admin emails here
 
 export async function GET(req: NextRequest) {
   try {
