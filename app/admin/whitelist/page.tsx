@@ -41,13 +41,22 @@ export default function WhitelistManager() {
 
   const fetchWhitelist = async () => {
     try {
+      console.log('Fetching whitelist...')
       const response = await fetch('/api/admin/whitelist')
+      console.log('Fetch response status:', response.status)
+
       if (response.ok) {
         const data = await response.json()
+        console.log('Fetched whitelist data:', data)
         setWhitelist(data.approvedEmails || [])
+      } else {
+        const error = await response.json()
+        console.error('Failed to fetch whitelist:', error)
+        setMessage(error.error || 'Failed to load whitelist')
       }
     } catch (error) {
       console.error('Error fetching whitelist:', error)
+      setMessage('Error loading whitelist')
     } finally {
       setLoading(false)
     }
@@ -56,6 +65,7 @@ export default function WhitelistManager() {
   const addEmail = async () => {
     if (!newEmail.trim()) return
 
+    console.log('Adding email:', newEmail)
     try {
       const response = await fetch('/api/admin/whitelist', {
         method: 'POST',
@@ -66,19 +76,28 @@ export default function WhitelistManager() {
         })
       })
 
+      console.log('Add response status:', response.status)
+      const data = await response.json()
+      console.log('Add response data:', data)
+
       if (response.ok) {
         setWhitelist([...whitelist, newEmail.toLowerCase().trim()])
         setNewEmail('')
         setMessage('Email added successfully')
         setTimeout(() => setMessage(''), 3000)
+      } else {
+        setMessage(data.error || 'Failed to add email')
+        setTimeout(() => setMessage(''), 3000)
       }
     } catch (error) {
       console.error('Error adding email:', error)
       setMessage('Error adding email')
+      setTimeout(() => setMessage(''), 3000)
     }
   }
 
   const removeEmail = async (email: string) => {
+    console.log('Removing email:', email)
     try {
       const response = await fetch('/api/admin/whitelist', {
         method: 'POST',
@@ -89,14 +108,22 @@ export default function WhitelistManager() {
         })
       })
 
+      console.log('Remove response status:', response.status)
+      const data = await response.json()
+      console.log('Remove response data:', data)
+
       if (response.ok) {
         setWhitelist(whitelist.filter(e => e !== email))
         setMessage('Email removed successfully')
+        setTimeout(() => setMessage(''), 3000)
+      } else {
+        setMessage(data.error || 'Failed to remove email')
         setTimeout(() => setMessage(''), 3000)
       }
     } catch (error) {
       console.error('Error removing email:', error)
       setMessage('Error removing email')
+      setTimeout(() => setMessage(''), 3000)
     }
   }
 
@@ -138,8 +165,20 @@ export default function WhitelistManager() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Whitelist Management</h1>
 
+        {/* Production warning */}
+        {process.env.NODE_ENV === 'production' && (
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-4">
+            <strong>Note:</strong> This app is running on Vercel. Whitelist changes are stored in memory and will reset when the server restarts.
+            For permanent changes, update the APPROVED_EMAILS environment variable in Vercel settings.
+          </div>
+        )}
+
         {message && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
+          <div className={`px-4 py-3 rounded mb-4 ${
+            message.includes('Error') || message.includes('Failed')
+              ? 'bg-red-50 border border-red-200 text-red-700'
+              : 'bg-green-50 border border-green-200 text-green-700'
+          }`}>
             {message}
           </div>
         )}
