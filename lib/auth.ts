@@ -26,11 +26,12 @@ export const authOptions: NextAuthOptions = {
         }
       },
       userinfo: "https://graph.microsoft.com/v1.0/me",
+      issuer: "https://login.microsoftonline.com/common/v2.0",
       profile(profile) {
         return {
-          id: profile.id,
+          id: profile.id || profile.sub,
           name: profile.displayName || profile.name,
-          email: profile.mail || profile.userPrincipalName,
+          email: profile.mail || profile.userPrincipalName || profile.email,
           image: null
         }
       }
