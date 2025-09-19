@@ -1,8 +1,8 @@
 # Code Documentation: Microsoft Azure AD Authentication System
 
-## ✅ AUTHENTICATION SUCCESSFULLY IMPLEMENTED
+## ⚠️ AUTHENTICATION PARTIALLY WORKING - WHITELIST ADMIN ISSUE
 
-**Status**: Working authentication with Microsoft Azure AD supporting both personal and work accounts.
+**Status**: Authentication works but admin whitelist page has redirect loop issue.
 
 ## System Architecture
 
@@ -133,6 +133,22 @@ The `auth-module` folder contains a standalone authentication package that can b
 3. Add production redirect URI to Azure app
 4. Test authentication flow
 
+## Known Issues
+
+### 🔴 CRITICAL: Admin Whitelist Page Redirect Loop
+**Problem**: `/admin/whitelist` page redirects back to dashboard instead of displaying
+- When trying to access the whitelist management page at `/admin/whitelist`
+- Page bounces back to dashboard even for admin users
+- Issue persists despite middleware configuration updates
+
+**Attempted Fixes**:
+- Updated middleware matcher to include `/admin/:path*`
+- Modified session handling in whitelist page component
+- Added issuer configuration to Azure AD provider
+- Fixed OAuth callback errors
+
+**Status**: UNRESOLVED - Needs investigation
+
 ## Troubleshooting
 
 ### Common Issues
@@ -148,6 +164,11 @@ The `auth-module` folder contains a standalone authentication package that can b
 3. **Dashboard not loading after auth**
    - Check if API endpoints are configured
    - Verify database connections
+
+4. **Admin whitelist page redirect loop**
+   - Currently unresolved
+   - Page keeps bouncing back to dashboard
+   - Affects `/admin/whitelist` route
 
 ## Security Notes
 
