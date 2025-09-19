@@ -13,5 +13,9 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/:path*"]
+  matcher: [
+    "/dashboard/:path*",
+    "/admin/:path*",
+    "/api/((?!auth).)*" // Protect all API routes except auth
+  ]
 }
