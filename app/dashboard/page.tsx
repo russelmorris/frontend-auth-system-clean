@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useMemo } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -8,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { NotesModal } from '@/components/ui/notes-modal';
-import { Download, Filter, Search, Package, FileText, X, Eye, Weight, Maximize, Clock, Thermometer, AlertTriangle } from 'lucide-react';
+import { Download, Filter, Search, Package, FileText, X, Eye, Weight, Maximize, Clock, Thermometer, AlertTriangle, Settings, LogOut } from 'lucide-react';
 import Image from 'next/image';
 
 interface LineItem {
@@ -64,6 +66,8 @@ interface Quote {
 }
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [allLineItems, setAllLineItems] = useState<LineItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +76,9 @@ export default function DashboardPage() {
     isOpen: false,
     quote: null
   });
+
+  // Check if user is admin
+  const isAdmin = session?.user?.email && ['russ@skyeam.com.au', 'info@consultai.com.au'].includes(session.user.email.toLowerCase());
   
   // Quote filters
   const [quoteCustomerFilter, setQuoteCustomerFilter] = useState<string[]>([]);
@@ -556,15 +563,37 @@ export default function DashboardPage() {
                 </h1>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={clearAllFilters}
-              size="sm"
-              className="bg-white dark:bg-gray-800"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Clear All
-            </Button>
+            <div className="flex gap-2">
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/admin/whitelist')}
+                  size="sm"
+                  className="bg-white dark:bg-gray-800"
+                >
+                  <Settings className="h-3 w-3 mr-1" />
+                  Manage Access
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={clearAllFilters}
+                size="sm"
+                className="bg-white dark:bg-gray-800"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Clear All
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => signOut()}
+                size="sm"
+                className="bg-white dark:bg-gray-800"
+              >
+                <LogOut className="h-3 w-3 mr-1" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
 

@@ -16,7 +16,7 @@ export default function WhitelistManager() {
   const [message, setMessage] = useState('')
 
   // Only allow specific admin emails to manage the whitelist
-  const adminEmails = ['info@consultai.com.au'] // Add your admin email here
+  const adminEmails = ['russ@skyeam.com.au', 'info@consultai.com.au']
 
   useEffect(() => {
     if (status === 'loading') return
