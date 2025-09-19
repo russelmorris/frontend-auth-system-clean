@@ -6,24 +6,26 @@ import path from 'path'
 
 // Load whitelist
 function loadWhitelist(): string[] {
-  // First try environment variable (preferred for production/Vercel)
+  // First try JSON file (preferred - allows easy editing)
+  try {
+    const whitelistPath = path.join(process.cwd(), 'whitelist.json')
+    const whitelistData = fs.readFileSync(whitelistPath, 'utf8')
+    const whitelist = JSON.parse(whitelistData)
+    console.log('Loading whitelist from JSON file:', whitelist.approvedEmails.length, 'emails')
+    return whitelist.approvedEmails.map((email: string) => email.toLowerCase())
+  } catch (error) {
+    console.log('JSON file not found, trying environment variable')
+  }
+
+  // Fallback to environment variable
   const envWhitelist = process.env.APPROVED_EMAILS
   if (envWhitelist) {
     console.log('Loading whitelist from environment variable')
     return envWhitelist.split(',').map(email => email.trim().toLowerCase())
   }
 
-  // Fallback to JSON file for local development
-  try {
-    const whitelistPath = path.join(process.cwd(), 'auth-module', 'whitelist.json')
-    const whitelistData = fs.readFileSync(whitelistPath, 'utf8')
-    const whitelist = JSON.parse(whitelistData)
-    console.log('Loading whitelist from JSON file')
-    return whitelist.approvedEmails.map((email: string) => email.toLowerCase())
-  } catch (error) {
-    console.error('No whitelist configuration found')
-    return []
-  }
+  console.error('No whitelist configuration found - allowing no users')
+  return []
 }
 
 const authOptions: NextAuthOptions = {

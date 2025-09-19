@@ -4,7 +4,7 @@ import fs from 'fs/promises'
 import path from 'path'
 
 // Admin emails who can manage the whitelist
-const ADMIN_EMAILS = ['info@consultai.com.au'] // Add your admin emails here
+const ADMIN_EMAILS = ['russ@skyeam.com.au', 'info@consultai.com.au'] // Add your admin emails here
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,8 +14,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Read whitelist
-    const whitelistPath = path.join(process.cwd(), 'auth-module', 'whitelist.json')
+    // Read whitelist from root directory
+    const whitelistPath = path.join(process.cwd(), 'whitelist.json')
     const data = await fs.readFile(whitelistPath, 'utf8')
     const whitelist = JSON.parse(data)
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { action, email } = body
 
-    const whitelistPath = path.join(process.cwd(), 'auth-module', 'whitelist.json')
+    const whitelistPath = path.join(process.cwd(), 'whitelist.json')
 
     // Read current whitelist
     let whitelist = { approvedEmails: [] as string[] }
