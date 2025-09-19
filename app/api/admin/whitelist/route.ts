@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -9,7 +10,7 @@ const ADMIN_EMAILS = ['russ@skyeam.com.au', 'info@consultai.com.au'] // Add your
 export async function GET(req: NextRequest) {
   try {
     // Check if user is admin
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     if (!session || !ADMIN_EMAILS.includes(session.user?.email?.toLowerCase() || '')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Check if user is admin
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     if (!session || !ADMIN_EMAILS.includes(session.user?.email?.toLowerCase() || '')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

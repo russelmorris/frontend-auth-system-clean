@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { redirect } from 'next/navigation'
 
 interface WhitelistData {
   approvedEmails: string[]
@@ -20,10 +19,17 @@ export default function WhitelistManager() {
 
   useEffect(() => {
     if (status === 'loading') return
-    if (!session) redirect('/auth/signin')
-    if (!adminEmails.includes(session.user?.email?.toLowerCase() || '')) {
-      redirect('/dashboard')
+
+    if (!session) {
+      window.location.href = '/auth/signin'
+      return
     }
+
+    if (!adminEmails.includes(session.user?.email?.toLowerCase() || '')) {
+      window.location.href = '/dashboard'
+      return
+    }
+
     fetchWhitelist()
   }, [session, status])
 
@@ -88,7 +94,38 @@ export default function WhitelistManager() {
     }
   }
 
-  if (loading) return <div>Loading...</div>
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div>Loading...</div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div>Redirecting to login...</div>
+      </div>
+    )
+  }
+
+  if (!adminEmails.includes(session.user?.email?.toLowerCase() || '')) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+          <p>You don't have permission to access this page.</p>
+          <button
+            onClick={() => window.location.href = '/dashboard'}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
