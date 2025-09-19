@@ -6,18 +6,22 @@ import path from 'path'
 
 // Load whitelist
 function loadWhitelist(): string[] {
+  // First try environment variable (preferred for production/Vercel)
+  const envWhitelist = process.env.APPROVED_EMAILS
+  if (envWhitelist) {
+    console.log('Loading whitelist from environment variable')
+    return envWhitelist.split(',').map(email => email.trim().toLowerCase())
+  }
+
+  // Fallback to JSON file for local development
   try {
     const whitelistPath = path.join(process.cwd(), 'auth-module', 'whitelist.json')
     const whitelistData = fs.readFileSync(whitelistPath, 'utf8')
     const whitelist = JSON.parse(whitelistData)
+    console.log('Loading whitelist from JSON file')
     return whitelist.approvedEmails.map((email: string) => email.toLowerCase())
   } catch (error) {
-    console.error('Error loading whitelist:', error)
-    // Fallback to environment variable if file not found
-    const envWhitelist = process.env.APPROVED_EMAILS
-    if (envWhitelist) {
-      return envWhitelist.split(',').map(email => email.trim().toLowerCase())
-    }
+    console.error('No whitelist configuration found')
     return []
   }
 }
